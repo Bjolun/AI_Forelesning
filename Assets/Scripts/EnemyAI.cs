@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -15,15 +16,36 @@ public class EnemyAI : MonoBehaviour
     // Referanse til målet agenten skal følge
     [SerializeField] private Transform followTarget;
 
+    
+
+    private enum States
+    {
+        Patrolling,
+        Chasing,
+    }
+
+    private States states;
+
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        states = States.Patrolling;
     }
+
 
     // Kontinuerlig gi agenten vår et mål den skal prøve å nå
     private void Update()
     {
- 
+        Debug.Log(states);
+         switch (states)
+        {
+            case States.Patrolling:
+                Patrolling();
+                break;
+            case States.Chasing:
+                Chasing();
+                break;
+        }
     }
 
     // Metode for Patrolling
@@ -58,5 +80,19 @@ public class EnemyAI : MonoBehaviour
         agent.SetDestination(followTarget.position);
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            states = States.Chasing;
+        }
+    }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            states = States.Patrolling;
+        }
+    }
 }
